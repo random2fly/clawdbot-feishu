@@ -1,18 +1,18 @@
 import type { ChannelOutboundAdapter } from "clawdbot/plugin-sdk";
-import { getFeishuRuntime } from "./runtime.js";
 import { sendMessageFeishu } from "./send.js";
 import { sendMediaFeishu } from "./media.js";
+import { chunkMarkdownText } from "./chunk.js";
 
 export const feishuOutbound: ChannelOutboundAdapter = {
   deliveryMode: "direct",
-  chunker: (text, limit) => getFeishuRuntime().channel.text.chunkMarkdownText(text, limit),
+  chunker: chunkMarkdownText,
   chunkerMode: "markdown",
   textChunkLimit: 4000,
-  sendText: async ({ cfg, to, text }) => {
+  sendText: async ({ cfg, to, text, accountId }) => {
     const result = await sendMessageFeishu({ cfg, to, text });
     return { channel: "feishu", ...result };
   },
-  sendMedia: async ({ cfg, to, text, mediaUrl }) => {
+  sendMedia: async ({ cfg, to, text, mediaUrl, accountId }) => {
     // Send text first if provided
     if (text?.trim()) {
       await sendMessageFeishu({ cfg, to, text });
